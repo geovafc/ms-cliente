@@ -1,16 +1,14 @@
 package com.coderbank.cliente.controller;
 
-import com.coderbank.cliente.domain.Cliente;
 import com.coderbank.cliente.dto.ClienteDTO;
 import com.coderbank.cliente.service.ClienteService;
-import org.springframework.beans.BeanUtils;
+import com.coderbank.cliente.controller.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,8 +43,9 @@ public class ClienteController {
 
         return clienteDTOOptional.<ResponseEntity<Object>>map(
                 clienteDTO -> ResponseEntity.status(HttpStatus.OK).body(clienteDTO))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente not found.")
-                );
+                .orElseThrow(
+                        () -> new ObjectNotFoundException("Objeto não encontrado para o id: "+ id)
+                        );
     }
 
     @DeleteMapping("/{id}")
