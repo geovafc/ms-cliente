@@ -2,12 +2,11 @@ package com.coderbank.cliente.service;
 
 import com.coderbank.cliente.domain.Cliente;
 import com.coderbank.cliente.dto.ClienteDTO;
+import com.coderbank.cliente.events.producer.ClienteProducer;
 import com.coderbank.cliente.repository.ClienteRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -28,12 +27,23 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private ClienteProducer clienteProducer;
+
     //Caso algo de errado, a transação com o banco de dados e'desfeita e os dados não são salvos
     @Transactional
     public ClienteDTO save(ClienteDTO clienteDTO) {
         log.info("Requisição para salvar cliente : {}", clienteDTO);
 
-        //        explicar uso do var
+        salvarClienteBancoDados(clienteDTO);
+
+        clienteProducer.adicionarEvento(clienteDTO);
+
+
+        return clienteDTO;
+    }
+
+    private void salvarClienteBancoDados(ClienteDTO clienteDTO) {
         var cliente = new Cliente();
 
         BeanUtils.copyProperties(clienteDTO, cliente);
@@ -41,8 +51,6 @@ public class ClienteService {
         cliente = clienteRepository.save(cliente);
 
         clienteDTO.setId(cliente.getId());
-
-        return clienteDTO;
     }
 
     public List<ClienteDTO> findAll() {
@@ -69,7 +77,7 @@ public class ClienteService {
 
         var cliente = clienteRepository.findById(id);
 
-        if(cliente.isPresent()){
+        if (cliente.isPresent()) {
             BeanUtils.copyProperties(cliente.get(), clienteDTO);
             return Optional.of(clienteDTO);
         }
