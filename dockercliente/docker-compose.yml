@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -23,3 +23,20 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  mysql:
+    image: mysql
+    container_name: db_cliente
+#    reinicia o container quando a máquina é reiniciada
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+#   Mantém os dados do Mysql persistente mesmo após recriar ou excluir o container
+    volumes:
+#   Define um volume de dados chamado 'dbdata' (precisa ter o ./ antes),
+# anexado ao container do mysql e montado no diretório '/var/lib/mysql' (diretório
+# padrão usado pelo mysql para armazenar todos os arquivos de dados)
+      - ./dbdata:/var/lib/docker/volumes/todo-mysql-data
+
