@@ -23,7 +23,7 @@ public class ClienteProducer {
         var cliente = builderCliente(clienteDTO);
         
 //        Objeto a ser enviado para o kafka com a informação do tópico e objeto
-        ProducerRecord<String, Object> record = new ProducerRecord<>("cliente_cadastrado", clienteDTO);
+        ProducerRecord<String, Object> record = new ProducerRecord<>("cliente_cadastrado", cliente);
         
         producer.send(record).addCallback(
                 s -> {
